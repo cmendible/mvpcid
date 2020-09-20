@@ -1,4 +1,4 @@
-module github.com/cmendible/mvpcreatorid
+module github.com/cmendible/mvpcid
 
 go 1.14
 
