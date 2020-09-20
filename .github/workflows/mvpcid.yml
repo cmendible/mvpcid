@@ -1,0 +1,59 @@
+name: mvpcid
+
+on:
+  push:
+    branches:
+      - master
+      - release-*
+    tags:
+      - v*
+  pull_request:
+    branches:
+      - master
+      - release-*
+jobs:
+  build:
+    name: Build ${{ matrix.target_os }}_${{ matrix.target_arch }} binaries
+    runs-on: ${{ matrix.os }}
+    env:
+      GOVER: 1.14
+      GOOS: ${{ matrix.target_os }}
+      GOARCH: ${{ matrix.target_arch }}
+      GOPROXY: https://proxy.golang.org
+      ARCHIVE_OUTDIR: dist/archives
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+        target_arch: [amd64]
+        include:
+          - os: ubuntu-latest
+            target_os: linux
+            filename: mvpcid
+          - os: windows-latest
+            target_os: windows
+            filename: mvpcid.exe
+          - os: macOS-latest
+            target_os: darwin
+            filename: mvpcid
+    steps:
+      - name: Set up Go ${{ env.GOVER }}
+        uses: actions/setup-go@v2-beta
+        with:
+          go-version: ${{ env.GOVER }}
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
+      - name: Run build and archive non windows binaries
+        if: matrix.target_os != 'windows'
+        run: |
+          mkdir -p ${{ env.ARCHIVE_OUTDIR }}/${{ matrix.target_os }}
+          GOOS=${{ matrix.target_os }} GOARCH=${{ matrix.target_arch }} go build -o ${{ env.ARCHIVE_OUTDIR }}/${{ matrix.target_os }}/${{ matrix.filename }} ./cmd/mvpcid/main.go
+      - name: Run build and archive windows binaries
+        if: matrix.target_os == 'windows'
+        run: |
+          mkdir -p ${{ env.ARCHIVE_OUTDIR }}/${{ matrix.target_os }}
+          go build -o ${{ env.ARCHIVE_OUTDIR }}/${{ matrix.target_os }}/${{ matrix.filename }} ./cmd/mvpcid/main.go
+      - name: upload artifacts
+        uses: actions/upload-artifact@master
+        with:
+          name: mvpcid_${{ matrix.target_os }}_${{ matrix.target_arch }}
+          path: ${{ env.ARCHIVE_OUTDIR }}/${{ matrix.target_os }}
