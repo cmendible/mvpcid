@@ -28,13 +28,13 @@ jobs:
         include:
           - os: ubuntu-latest
             target_os: linux
-            filename: mvpcid
+            filename: mvpcid_linux_amd64
           - os: windows-latest
             target_os: windows
-            filename: mvpcid.exe
+            filename: mvpcid_windows_amd64.exe
           - os: macOS-latest
             target_os: darwin
-            filename: mvpcid
+            filename: mvpcid_darwin_amd64
     steps:
       - name: Set up Go ${{ env.GOVER }}
         uses: actions/setup-go@v2-beta
@@ -57,3 +57,54 @@ jobs:
         with:
           name: mvpcid_${{ matrix.target_os }}_${{ matrix.target_arch }}
           path: ${{ env.ARCHIVE_OUTDIR }}/${{ matrix.target_os }}
+  publish:
+    name: Publish binaries
+    needs: build
+    if: github.event_name != 'pull_request'
+    env:
+      ARTIFACT_DIR: ./release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
+      - name: download artifacts - mvpcid_linux_amd64
+        uses: actions/download-artifact@master
+        with:
+          name: mvpcid_linux_amd64
+          path: ${{ env.ARTIFACT_DIR }}
+      - name: download artifacts - mvpcid_windows_amd64
+        uses: actions/download-artifact@master
+        with:
+          name: mvpcid_windows_amd64
+          path: ${{ env.ARTIFACT_DIR }}
+      - name: download artifacts - mvpcid_darwin_amd64
+        uses: actions/download-artifact@master
+        with:
+          name: mvpcid_darwin_amd64
+          path: ${{ env.ARTIFACT_DIR }}
+      - name: publish binaries to github
+        if: startswith(github.ref, 'refs/tags/v')
+        run: |
+          echo "installing github-release-cli..."
+          sudo npm install --silent --no-progress -g @babel/runtime
+          sudo npm install --silent --no-progress -g github-release-cli
+
+          # Get the list of files
+          RELEASE_ARTIFACT=(${ARTIFACT_DIR}/*)
+
+          # Parse repository to get owner and repo names
+          OWNER_NAME="${GITHUB_REPOSITORY%%/*}"
+          REPO_NAME="${GITHUB_REPOSITORY#*/}"
+
+          REL_VERSION="0.1.0"
+          RELEASE_BODY="This is the release candidate ${REL_VERSION}"
+
+          export GITHUB_TOKEN=${{ secrets.MVPCID_BOT_TOKEN }}
+          echo "Uploading mvpcid Binaries to GitHub Release"
+          github-release upload \
+            --owner $OWNER_NAME --repo $REPO_NAME \
+            --tag "v${REL_VERSION}" \
+            --release-name "mvpcid v${REL_VERSION}" \
+            --body "${RELEASE_BODY}" \
+            --prerelease true \
+            ${RELEASE_ARTIFACT[*]}
