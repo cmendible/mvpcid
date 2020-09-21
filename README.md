@@ -11,3 +11,11 @@ Sample:
 ```shell
 export MVP_CREATOR_ID=AZ-MVP-5002618
 ```
+
+## Usage
+
+The tool is easy to use:
+
+* Copy a valid url.
+* Run the command line program.
+* Paste the new url with your MVP Creator ID wherever you need it.
