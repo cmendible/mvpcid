@@ -51,7 +51,7 @@ jobs:
         if: matrix.target_os == 'windows'
         run: |
           mkdir -p ${{ env.ARCHIVE_OUTDIR }}/${{ matrix.target_os }}
-          go build -o ${{ env.ARCHIVE_OUTDIR }}/${{ matrix.target_os }}/${{ matrix.filename }} ./cmd/mvpcid/main.go
+          go build -ldflags "-s -w" -o ${{ env.ARCHIVE_OUTDIR }}/${{ matrix.target_os }}/${{ matrix.filename }} ./cmd/mvpcid/main.go
       - name: upload artifacts
         uses: actions/upload-artifact@master
         with:
