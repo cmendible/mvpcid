@@ -1,3 +1,5 @@
+![mvpcid](https://github.com/cmendible/mvpcid/workflows/mvpcid/badge.svg)
+
 # mvpcid
 
 Small console application to append a MVP Creator ID to any valid url previously copied to the clipboard.
