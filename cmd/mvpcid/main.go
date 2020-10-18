@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/MakeNowJust/hotkey"
 	"github.com/atotto/clipboard"
 )
 
@@ -15,16 +16,31 @@ func main() {
 		code = "WT.mc_id=AZ-MVP-5002618"
 	}
 
-	text, _ := clipboard.ReadAll()
-	if isValidURL(text) && !strings.Contains(text, code) {
-		querystring := "?"
-		if strings.Contains(text, querystring) {
-			querystring = "&"
+	hkey := hotkey.New()
+
+	quit := make(chan bool)
+
+	_, _ = hkey.Register(hotkey.Ctrl+hotkey.Shift, 'Q', func() {
+		quit <- true
+	})
+
+	_, _ = hkey.Register(hotkey.Ctrl+hotkey.Shift, 'M', func() {
+		text, _ := clipboard.ReadAll()
+		if isValidURL(text) && !strings.Contains(text, code) {
+			querystring := "?"
+			if strings.Contains(text, querystring) {
+				querystring = "&"
+			}
+			newURL := text + querystring + code
+			fmt.Println(newURL)
+			err := clipboard.WriteAll(newURL)
+			if err != nil {
+				fmt.Println(err)
+			}
 		}
-		newURL := text + querystring + code
-		fmt.Println(newURL)
-		clipboard.WriteAll(newURL)
-	}
+	})
+
+	<-quit
 }
 
 // isValidURL tests a string to determine if it is a well-structured url or not.
