@@ -11,10 +11,12 @@ import (
 )
 
 func main() {
-	code := os.Getenv("MVP_CREATOR_ID")
-	if len(code) == 0 {
-		code = "WT.mc_id=AZ-MVP-5002618"
+	creatorID := os.Getenv("MVP_CREATOR_ID")
+	if len(creatorID) == 0 {
+		creatorID = "AZ-MVP-5002618"
 	}
+
+	code := fmt.Sprintf("WT.mc_id=%s", creatorID)
 
 	hkey := hotkey.New()
 
