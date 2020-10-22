@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"runtime"
 	"strings"
 
 	"github.com/MakeNowJust/hotkey"
@@ -18,31 +19,39 @@ func main() {
 
 	code := fmt.Sprintf("WT.mc_id=%s", creatorID)
 
-	hkey := hotkey.New()
+	if runtime.GOOS == "windows" {
+		hkey := hotkey.New()
 
-	quit := make(chan bool)
+		quit := make(chan bool)
 
-	_, _ = hkey.Register(hotkey.Ctrl+hotkey.Shift, 'Q', func() {
-		quit <- true
-	})
+		_, _ = hkey.Register(hotkey.Ctrl+hotkey.Shift, 'Q', func() {
+			quit <- true
+		})
 
-	_, _ = hkey.Register(hotkey.Ctrl+hotkey.Shift, 'M', func() {
-		text, _ := clipboard.ReadAll()
-		if isValidURL(text) && !strings.Contains(text, code) {
-			querystring := "?"
-			if strings.Contains(text, querystring) {
-				querystring = "&"
-			}
-			newURL := text + querystring + code
-			fmt.Println(newURL)
-			err := clipboard.WriteAll(newURL)
-			if err != nil {
-				fmt.Println(err)
-			}
+		_, _ = hkey.Register(hotkey.Ctrl+hotkey.Shift, 'M', func() {
+			appendCreatorID(code)
+		})
+
+		<-quit
+	} else {
+		appendCreatorID(code)
+	}
+}
+
+func appendCreatorID(code string) {
+	text, _ := clipboard.ReadAll()
+	if isValidURL(text) && !strings.Contains(text, code) {
+		querystring := "?"
+		if strings.Contains(text, querystring) {
+			querystring = "&"
 		}
-	})
-
-	<-quit
+		newURL := text + querystring + code
+		fmt.Println(newURL)
+		err := clipboard.WriteAll(newURL)
+		if err != nil {
+			fmt.Println(err)
+		}
+	}
 }
 
 // isValidURL tests a string to determine if it is a well-structured url or not.
