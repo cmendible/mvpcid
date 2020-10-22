@@ -15,4 +15,4 @@ Small console application to append a MVP Creator ID to any valid url previously
 * Copy a valid url.
 * Press `Ctrl+Shift+M` to add your MVP Creator ID to the url in the clipboard.
 * Paste the new url with your MVP Creator ID wherever you need it.
-* Press `Ctrl+Shift+Q` to close the program at anny tiem.
+* Press `Ctrl+Shift+Q` to close the program at any time.
