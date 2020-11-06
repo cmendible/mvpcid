@@ -42,16 +42,21 @@ jobs:
           go-version: ${{ env.GOVER }}
       - name: Check out code into the Go module directory
         uses: actions/checkout@v2
+      - name: Create output folder
+        run: |
+          mkdir -p ${{ env.ARCHIVE_OUTDIR }}/${{ matrix.target_os }}
+      - name: Use rsrc to embedd the mvp ico file
+        run: |
+          go get github.com/akavel/rsrc
+          rsrc -ico ./assets/mvp.ico -o ./cmd/mvpcid/rsrc.syso
       - name: Run build and archive non windows binaries
         if: matrix.target_os != 'windows'
         run: |
-          mkdir -p ${{ env.ARCHIVE_OUTDIR }}/${{ matrix.target_os }}
-          GOOS=${{ matrix.target_os }} GOARCH=${{ matrix.target_arch }} go build -ldflags "-s -w" -o ${{ env.ARCHIVE_OUTDIR }}/${{ matrix.target_os }}/${{ matrix.filename }} ./cmd/mvpcid/main.go
+          GOOS=${{ matrix.target_os }} GOARCH=${{ matrix.target_arch }} go build -ldflags "-s -w" -o ${{ env.ARCHIVE_OUTDIR }}/${{ matrix.target_os }}/${{ matrix.filename }} ./cmd/mvpcid/
       - name: Run build and archive windows binaries
         if: matrix.target_os == 'windows'
         run: |
-          mkdir -p ${{ env.ARCHIVE_OUTDIR }}/${{ matrix.target_os }}
-          go build -ldflags "-s -w" -o ${{ env.ARCHIVE_OUTDIR }}/${{ matrix.target_os }}/${{ matrix.filename }} ./cmd/mvpcid/main.go
+          go build -ldflags "-s -w" -o ${{ env.ARCHIVE_OUTDIR }}/${{ matrix.target_os }}/${{ matrix.filename }} ./cmd/mvpcid/
       - name: upload artifacts
         uses: actions/upload-artifact@master
         with:
@@ -96,7 +101,7 @@ jobs:
           OWNER_NAME="${GITHUB_REPOSITORY%%/*}"
           REPO_NAME="${GITHUB_REPOSITORY#*/}"
 
-          REL_VERSION="0.1.2"
+          REL_VERSION="0.1.3"
           RELEASE_BODY="This is the release candidate ${REL_VERSION}"
 
           export GITHUB_TOKEN=${{ secrets.MVPCID_BOT_TOKEN }}
