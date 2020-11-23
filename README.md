@@ -19,6 +19,8 @@ Small console application to append a MVP Creator ID to any valid url previously
 * Paste the new url with your MVP Creator ID wherever you need it.
 * Press `Ctrl+Shift+Q` to close the program at any time.
 
+![mvpcid screenshot](/assets/mvpcid.png)
+
 ### Linux & Mac OS
 
 * Copy a valid url.
