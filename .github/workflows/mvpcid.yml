@@ -37,7 +37,7 @@ jobs:
             filename: mvpcid_darwin_amd64
     steps:
       - name: Set up Go ${{ env.GOVER }}
-        uses: actions/setup-go@v2-beta
+        uses: actions/setup-go@v2.1.3
         with:
           go-version: ${{ env.GOVER }}
       - name: Check out code into the Go module directory
